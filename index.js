@@ -107,7 +107,7 @@ app.get('/health', (req, res) => {
 });
 
 // ✅ Wix plugins & webhooks endpoint
-app.post('/plugins-and-webhooks/', (req, res) => {
+app.post('/plugins-and-webhooks/*', (req, res) => {
   console.log(`🔄 Processing Wix request: ${req.method} ${req.path}`);
   console.log('Headers:', Object.keys(req.headers));
 
@@ -121,13 +121,13 @@ app.post('/plugins-and-webhooks/', (req, res) => {
 
 
 
-// app.all('*', (req, res) => {
-//   console.log(`🚫 Unhandled: ${req.method} ${req.path}`);
-//   res.status(404).json({ 
-//     error: 'Not found',
-//     message: 'Service plugin endpoint is POST /plugins-and-webhooks/*'
-//   });
-// });
+app.all('*', (req, res) => {
+  console.log(`🚫 Unhandled: ${req.method} ${req.path}`);
+  res.status(404).json({ 
+    error: 'Not found',
+    message: 'Service plugin endpoint is POST /plugins-and-webhooks/*'
+  });
+});
 
 
 // ✅ Start server
