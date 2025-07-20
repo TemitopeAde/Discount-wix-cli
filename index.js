@@ -116,7 +116,6 @@ app.post("/v1/list-triggers", (req, res) => {
 
 app.post("/v1/get-eligible-triggers", async (request, res) => {
   try {
-    const { request } = req.body;
     console.log(request.body);
     console.log(request);
     
