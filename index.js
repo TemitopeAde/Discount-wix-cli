@@ -9,6 +9,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  console.log('Content-Type:', req.headers['content-type']);
+  console.log('Body:', req.body);
+  next();
+});
+
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
@@ -114,14 +122,14 @@ app.post("/v1/list-triggers", (req, res) => {
   }
 });
 
-app.post("/v1/get-eligible-triggers", async (request, res) => {
+app.post("/v1/get-eligible-triggers", async (req, res) => {
   try {
-    console.log(request.body);
-    console.log(request);
+    console.log(req.body);
+    console.log(req);
     
     const eligibleTriggers = [];
 
-    for (const triggerToCheck of request.triggers || []) {
+    for (const triggerToCheck of req.triggers || []) {
       const customTrigger = triggerToCheck.customTrigger;
       const identifier = triggerToCheck.identifier;
 
