@@ -5,17 +5,14 @@ import { customTriggers } from '@wix/ecom/service-plugins';
 
 const app = express();
 
-// ✅ Use built-in JSON parser and CORS correctly
-app.use(cors());  // Allow all origins
+app.use(cors()); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Routes
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// ✅ Wix client setup
 const wixClient = createClient({
   auth: AppStrategy({
     appId: "0a3fffa5-066c-4fc3-b7af-7138928b62c1",
@@ -35,14 +32,12 @@ XhDDwZS8EgYkKQ+3coG87DVLOXRP1CI8t+8x80xYn+fM1VVyG/u/SiyLLYV4qJiQ
   }
 });
 
-// ✅ Available triggers
 const availableTriggers = [
   { _id: "happy-hour-trigger", name: "Happy Hour, weekdays, 16:00-18:00" },
   { _id: "weekend-special-trigger", name: "Weekend Special Discount" },
   { _id: "member-only-trigger", name: "Members Only Discount" }
 ];
 
-// ✅ Provide handlers
 wixClient.customTriggers.provideHandlers({
   listTriggers: async (payload) => {
     try {
@@ -96,7 +91,6 @@ wixClient.customTriggers.provideHandlers({
   }
 });
 
-// ✅ Health endpoint
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -106,7 +100,26 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ✅ Wix plugins & webhooks endpoint
+app.post("/v1/list-triggers", (req, res) => {
+  try {
+    res.status(200).json({
+      customTriggers: [
+        {
+          id: "happy-hour",
+          name: "Happy Hour (Weekdays 16:00–18:00)"
+        },
+        {
+          id: "paid-plan-discount",
+          name: "Customer with Active Paid Plan"
+        }
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 app.post('/plugins-and-webhooks/*', (req, res) => {
   console.log(`🔄 Processing Wix request: ${req.method} ${req.path}`);
   console.log('Headers:', Object.keys(req.headers));
@@ -130,7 +143,6 @@ app.all('*', (req, res) => {
 });
 
 
-// ✅ Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('🚀 Custom Discount Triggers Service Plugin Started');
