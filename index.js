@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
 const wixClient = createClient({
   auth: AppStrategy({
     appId: "0a3fffa5-066c-4fc3-b7af-7138928b62c1",
+    
     publicKey: `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiCmHJHomL1g7SWvgd9tu
 CKy/WXMAmemd2RfzR+6M4VD76OPswZwofQZPQ8ShMMLJ86MfpWQMIwNZu07F3Waw
@@ -106,7 +107,7 @@ app.get('/health', (req, res) => {
 });
 
 // ✅ Wix plugins & webhooks endpoint
-app.post('/plugins-and-webhooks', (req, res) => {
+app.post('/plugins-and-webhooks/*', (req, res) => {
   console.log(`🔄 Processing Wix request: ${req.method} ${req.path}`);
   console.log('Headers:', Object.keys(req.headers));
 
@@ -117,6 +118,17 @@ app.post('/plugins-and-webhooks', (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+
+app.all('*', (req, res) => {
+  console.log(`🚫 Unhandled: ${req.method} ${req.path}`);
+  res.status(404).json({ 
+    error: 'Not found',
+    message: 'Service plugin endpoint is POST /plugins-and-webhooks/*'
+  });
+});
+
 
 // ✅ Start server
 const PORT = process.env.PORT || 3000;
