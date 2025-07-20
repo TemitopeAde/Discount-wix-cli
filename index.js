@@ -5,7 +5,7 @@ import { customTriggers } from '@wix/ecom/service-plugins';
 
 const app = express();
 
-app.use(cors()); 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
 const wixClient = createClient({
   auth: AppStrategy({
     appId: "0a3fffa5-066c-4fc3-b7af-7138928b62c1",
-    
+
     publicKey: `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiCmHJHomL1g7SWvgd9tu
 CKy/WXMAmemd2RfzR+6M4VD76OPswZwofQZPQ8ShMMLJ86MfpWQMIwNZu07F3Waw
@@ -33,9 +33,10 @@ XhDDwZS8EgYkKQ+3coG87DVLOXRP1CI8t+8x80xYn+fM1VVyG/u/SiyLLYV4qJiQ
 });
 
 const availableTriggers = [
-  { _id: "happy-hour-trigger", name: "Happy Hour, weekdays, 16:00-18:00" },
-  { _id: "weekend-special-trigger", name: "Weekend Special Discount" },
-  { _id: "member-only-trigger", name: "Members Only Discount" }
+  {
+    id: "paid-plan-discount",
+    name: "Customer with Active Paid Plan"
+  }
 ];
 
 wixClient.customTriggers.provideHandlers({
@@ -54,11 +55,6 @@ wixClient.customTriggers.provideHandlers({
   },
 
   getEligibleTriggers: async ({ request, metadata }) => {
-    console.log("🎯 GET ELIGIBLE TRIGGERS called", metadata);
-    const now = new Date();
-    const hour = now.getHours();
-    const day = now.getDay();
-
     const eligibleTriggers = [];
 
     for (const triggerToCheck of request.triggers || []) {
@@ -68,14 +64,17 @@ wixClient.customTriggers.provideHandlers({
       let isEligible = false;
 
       switch (customTrigger._id) {
-        case 'happy-hour-trigger':
-          isEligible = (hour >= 16 && hour < 18) && (day >= 1 && day <= 5);
-          break;
-        case 'weekend-special-trigger':
-          isEligible = (day === 0 || day === 6);
-          break;
-        case 'member-only-trigger':
-          isEligible = !!metadata.identity?.memberId;
+        case 'paid-plan-discount':
+          const memberId = metadata.identity?.memberId;
+          if (memberId) {
+            try {
+              const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
+              const activePlans = plansResponse.memberships?.filter(plan => plan.status === 'ACTIVE');
+              isEligible = activePlans.length > 0;
+            } catch (error) {
+              console.error("Error checking paid plan:", error);
+            }
+          }
           break;
       }
 
@@ -115,6 +114,50 @@ app.post("/v1/list-triggers", (req, res) => {
   }
 });
 
+app.post("/v1/get-eligible-triggers", async (req, res) => {
+  try {
+    const { request, metadata } = req.body;
+    console.log({metadata, request});
+    
+    const eligibleTriggers = [];
+
+    for (const triggerToCheck of request.triggers || []) {
+      const customTrigger = triggerToCheck.customTrigger;
+      const identifier = triggerToCheck.identifier;
+
+      let isEligible = false;
+
+      switch (customTrigger._id) {
+        case 'paid-plan-discount':
+          const memberId = metadata.identity?.memberId;
+          if (memberId) {
+            try {
+              const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
+              const activePlans = plansResponse.memberships?.filter(plan => plan.status === 'ACTIVE');
+              isEligible = activePlans.length > 0;
+            } catch (error) {
+              console.error("Error checking paid plan:", error);
+            }
+          }
+          break;
+      }
+
+      if (isEligible) {
+        eligibleTriggers.push({
+          customTriggerId: customTrigger._id,
+          identifier
+        });
+      }
+    }
+
+    res.status(200).json({ eligibleTriggers });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 app.post('/plugins-and-webhooks/*', (req, res) => {
   console.log(`🔄 Processing Wix request: ${req.method} ${req.path}`);
   console.log('Headers:', Object.keys(req.headers));
@@ -127,16 +170,13 @@ app.post('/plugins-and-webhooks/*', (req, res) => {
   }
 });
 
-
-
 app.all('*', (req, res) => {
   console.log(`🚫 Unhandled: ${req.method} ${req.path}`);
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Not found',
     message: 'Service plugin endpoint is POST /plugins-and-webhooks/*'
   });
 });
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
