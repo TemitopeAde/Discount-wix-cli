@@ -1,0 +1,19 @@
+{
+  "name": "discount",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@wix/ecom": "^1.0.1245",
+    "@wix/sdk": "^1.15.24",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
