@@ -105,10 +105,6 @@ app.post("/v1/list-triggers", (req, res) => {
     res.status(200).json({
       customTriggers: [
         {
-          id: "happy-hour",
-          name: "Happy Hour (Weekdays 16:00–18:00)"
-        },
-        {
           id: "paid-plan-discount",
           name: "Customer with Active Paid Plan"
         }
@@ -118,7 +114,6 @@ app.post("/v1/list-triggers", (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 app.post('/plugins-and-webhooks/*', (req, res) => {
   console.log(`🔄 Processing Wix request: ${req.method} ${req.path}`);
