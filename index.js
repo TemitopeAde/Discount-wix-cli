@@ -114,11 +114,11 @@ app.post("/v1/list-triggers", (req, res) => {
   }
 });
 
-app.post("/v1/get-eligible-triggers", async (req, res) => {
+app.post("/v1/get-eligible-triggers", async (request, res) => {
   try {
-    const { req } = req.body;
-    console.log(req.body);
-    console.log(req);
+    const { request } = req.body;
+    console.log(request.body);
+    console.log(request);
     
     const eligibleTriggers = [];
 
@@ -128,20 +128,20 @@ app.post("/v1/get-eligible-triggers", async (req, res) => {
 
       let isEligible = false;
 
-      switch (customTrigger._id) {
-        case 'paid-plan-discount':
-          const memberId = metadata.identity?.memberId;
-          if (memberId) {
-            try {
-              const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
-              const activePlans = plansResponse.memberships?.filter(plan => plan.status === 'ACTIVE');
-              isEligible = activePlans.length > 0;
-            } catch (error) {
-              console.error("Error checking paid plan:", error);
-            }
-          }
-          break;
-      }
+      // switch (customTrigger._id) {
+      //   case 'paid-plan-discount':
+      //     const memberId = metadata.identity?.memberId;
+      //     if (memberId) {
+      //       try {
+      //         const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
+      //         const activePlans = plansResponse.memberships?.filter(plan => plan.status === 'ACTIVE');
+      //         isEligible = activePlans.length > 0;
+      //       } catch (error) {
+      //         console.error("Error checking paid plan:", error);
+      //       }
+      //     }
+      //     break;
+      // }
 
       if (isEligible) {
         eligibleTriggers.push({
