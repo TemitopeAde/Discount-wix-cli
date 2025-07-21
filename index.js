@@ -4,7 +4,7 @@ import { createClient, AppStrategy } from '@wix/sdk';
 import { customTriggers } from '@wix/ecom/service-plugins';
 import jwt from 'jsonwebtoken';
 import { members } from '@wix/members';
-import { orders } from '@wix/pricing-plans';
+import { orders, plans, plansV3 } from '@wix/pricing-plans';
 
 
 const app = express();
@@ -69,21 +69,14 @@ const parseTextPlainJwt = (req, res, next) => {
 
 async function listOrders() {
   try {
-    const options = {
-      limit: 50, 
-      sorting: {
-        fieldName: "createdDate", 
-        order: "DESC" 
-      }
-    };
-
-    const ordersList = await orders.managementListOrders(options);
-    console.log(ordersList); 
+    const ordersList = await orders.memberListOrders();
+    console.log(ordersList);
     return ordersList;
   } catch (error) {
-    console.error("Error retrieving orders:", error);
+    console.error(error);
   }
 }
+
 
 
 wixClient.customTriggers.provideHandlers({
@@ -177,7 +170,6 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     }
   }
 
-
   if (!request || !metadata) {
     return res.status(400).json({ error: "Invalid body format" });
   }
@@ -188,10 +180,9 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     let isEligible = false;
 
 
-
     if (id === 'paid-plan-discount') {
       const memberId = metadata?.identity?.memberId;
-      const res = await listOrders(memberId);
+      const res = await listOrders();
       console.log({ res });
 
       if (memberId) {
