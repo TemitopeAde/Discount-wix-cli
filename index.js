@@ -144,45 +144,40 @@ app.post("/v1/list-triggers", (req, res) => {
   }
 });
 
-app.post('/v1/get-eligible-triggers', parseTextPlainJwt, async (req, res) => {
-  const { request, metadata } = req.body;
-  console.log(req.body);
-  
+app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
+  const request = req.body?.data?.request;
+  const metadata = req.body?.data?.metadata;
   const eligibleTriggers = [];
-  // console.log(request.triggers);
+
+
+  if (!request || !metadata) {
+    return res.status(400).json({ error: "Invalid body format" });
+  }
+  console.log(request.triggers);
   
-  for (const trigger of request?.triggers || []) {
+  for (const trigger of request.triggers || []) {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
     let isEligible = false;
 
-    console.log(id);
-    
-
-    switch (id) {
-      case 'paid-plan-discount':
-        const memberId = metadata?.identity?.memberId;
-        console.log(memberId);
-        
-        if (memberId) {
-          try {
-            const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
-            console.log({plansResponse});
-            
-            const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
-            isEligible = activePlans.length > 0;
-          } catch (err) {
-            console.error("Error checking membership:", err);
-          }
+    if (id === 'paid-plan-discount') {
+      const memberId = metadata?.identity?.memberId;
+      if (memberId) {
+        try {
+          const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
+          const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
+          isEligible = activePlans.length > 0;
+        } catch (err) {
+          console.error("Error checking membership:", err);
         }
-        break;
+      }
     }
 
     if (isEligible) {
-      eligibleTriggers.push({ customTriggerId: id, identifier });
-    } else {
-      console.log("not eligible");
-      
+      eligibleTriggers.push({
+        customTriggerId: id,
+        identifier
+      });
     }
   }
 
