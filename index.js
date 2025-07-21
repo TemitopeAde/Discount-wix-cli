@@ -135,6 +135,8 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     const identifier = trigger.identifier;
 
     let isEligible = false;
+    console.log({memberId});
+    
 
     if (id === 'paid-plan-discount' && memberId) {
       try {
