@@ -35,9 +35,6 @@ const wixClient = createClient({
     customTriggers,
     members: {
       members
-    },
-    plans: {
-      plans
     }
   }
 });
@@ -75,7 +72,6 @@ const parseTextPlainJwt = (req, res, next) => {
 async function listOrders() {
   try {
     const ordersList = await orders.memberListOrders();
-    console.log(wixClient.plans.plans());
     console.log(ordersList);
     return ordersList;
   } catch (error) {
