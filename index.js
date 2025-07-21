@@ -159,9 +159,13 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
     let isEligible = false;
-
+    console.log(metadata?.identity?.memberId);
+    console.log(id);
+    
+    
     if (id === 'paid-plan-discount') {
       const memberId = metadata?.identity?.memberId;
+
       if (memberId) {
         try {
           const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
