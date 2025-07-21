@@ -18,7 +18,6 @@ const availableTriggers = [
   }
 ];
 
-// 🔐 Middleware to parse raw JWTs sent as text/plain
 const parseTextPlainJwt = (req, res, next) => {
   if (req.is('text/plain')) {
     let raw = '';
@@ -29,7 +28,7 @@ const parseTextPlainJwt = (req, res, next) => {
         const decoded = jwt.decode(raw, { complete: false });
         req.body = decoded;
       } catch (e) {
-        console.error("❌ Failed to decode JWT:", e);
+        console.error("Failed to decode JWT:", e);
         req.body = {};
       }
       next();
@@ -39,7 +38,6 @@ const parseTextPlainJwt = (req, res, next) => {
   }
 };
 
-// ✅ Factory to get a wixClient with proper instanceId
 function getWixClient(instanceId) {
   return createClient({
     auth: AppStrategy({
@@ -57,10 +55,9 @@ function getWixClient(instanceId) {
   });
 }
 
-// 🔍 Custom Triggers Handler Registration
 customTriggers.provideHandlers({
   listTriggers: async ({ metadata }) => {
-    console.log("📋 LIST TRIGGERS called", { instanceId: metadata.instanceId });
+    console.log("LIST TRIGGERS called", { instanceId: metadata.instanceId });
     return { customTriggers: availableTriggers };
   },
 
@@ -101,12 +98,10 @@ customTriggers.provideHandlers({
 
 
 
-// 🧪 Manual Trigger List Test
 app.post("/v1/list-triggers", (req, res) => {
   res.status(200).json({ customTriggers: availableTriggers });
 });
 
-// 🧪 Manual Eligible Trigger Test
 app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const request = req.body?.data?.request;
   const metadata = req.body?.data?.metadata;
@@ -121,6 +116,20 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
 
   const eligibleTriggers = [];
 
+
+  async function listOrders() {
+    try {
+      // const ordersList = await orders.memberListOrders();
+      const orderList = await wixClient.orders.memberListOrders();
+      console.log(orderList);
+      
+      return orderList;
+    } catch (error) {
+      console.error(error);
+      // Handle the error
+    }
+  }
+
   for (const trigger of request.triggers || []) {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
@@ -129,9 +138,10 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
 
     if (id === 'paid-plan-discount' && memberId) {
       try {
-        const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
-        const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
-        isEligible = activePlans.length > 0;
+        await listOrders()
+        // const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
+        // const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
+        // isEligible = activePlans.length > 0;
       } catch (err) {
         console.error("Error checking membership:", err);
       }
@@ -145,19 +155,17 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   res.status(200).json({ eligibleTriggers });
 });
 
-// 🧩 Handle official Wix request routing
 app.post('/plugins-and-webhooks/*', (req, res) => {
-  console.log(`🔄 Processing Wix request: ${req.method} ${req.path}`);
+  console.log(`Processing Wix request: ${req.method} ${req.path}`);
   console.log('Headers:', Object.keys(req.headers));
   try {
     customTriggers.process(req, res);
   } catch (error) {
-    console.error('❌ Error processing request:', error);
+    console.error('Error processing request:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// 🔚 Catch-all
 app.all('*', (req, res) => {
   res.status(404).json({
     error: 'Not found',
@@ -165,10 +173,9 @@ app.all('*', (req, res) => {
   });
 });
 
-// 🚀 Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log('🚀 Custom Discount Triggers Service Plugin Started');
-  console.log(`📡 Server: http://localhost:${PORT}`);
-  console.log(`🔗 Health: http://localhost:${PORT}/health`);
+  console.log('Custom Discount Triggers Service Plugin Started');
+  console.log(`Server: http://localhost:${PORT}`);
+  console.log(`Health: http://localhost:${PORT}/health`);
 });
