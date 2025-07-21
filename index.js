@@ -47,6 +47,27 @@ const availableTriggers = [
   }
 ];
 
+
+const parseTextPlainJson = (req, res, next) => {
+  if (req.is('text/plain')) {
+    let raw = '';
+    req.setEncoding('utf8');
+    req.on('data', chunk => raw += chunk);
+    req.on('end', () => {
+      try {
+        // console.log(raw);
+        
+        req.body = JSON.parse(raw);
+      } catch {
+        req.body = {};
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+};
+
 wixClient.customTriggers.provideHandlers({
   listTriggers: async (payload) => {
     try {
@@ -122,47 +143,36 @@ app.post("/v1/list-triggers", (req, res) => {
   }
 });
 
-app.post("/v1/get-eligible-triggers", async (req, res) => {
-  try {
-    console.log(req.body);
-    console.log(req);
-    
-    const eligibleTriggers = [];
+app.post('/v1/get-eligible-triggers', parseTextPlainJson, async (req, res) => {
+  const { request, metadata } = req.body;
+  const eligibleTriggers = [];
+  console.log(req.body);
+  
 
-    for (const triggerToCheck of req.triggers || []) {
-      const customTrigger = triggerToCheck.customTrigger;
-      const identifier = triggerToCheck.identifier;
+  for (const trigger of request?.triggers || []) {
+    const id = trigger.customTrigger?.id;
+    const identifier = trigger.identifier;
+    let isEligible = false;
 
-      let isEligible = false;
-
-      // switch (customTrigger._id) {
-      //   case 'paid-plan-discount':
-      //     const memberId = metadata.identity?.memberId;
-      //     if (memberId) {
-      //       try {
-      //         const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
-      //         const activePlans = plansResponse.memberships?.filter(plan => plan.status === 'ACTIVE');
-      //         isEligible = activePlans.length > 0;
-      //       } catch (error) {
-      //         console.error("Error checking paid plan:", error);
-      //       }
-      //     }
-      //     break;
-      // }
-
-      if (isEligible) {
-        eligibleTriggers.push({
-          customTriggerId: customTrigger._id,
-          identifier
-        });
-      }
+    switch (id) {
+      case 'paid-plan-discount':
+        const memberId = metadata?.identity?.memberId;
+        if (memberId) {
+          try {
+            const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
+            const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
+            isEligible = activePlans.length > 0;
+          } catch {}
+        }
+        break;
     }
 
-    res.status(200).json({ eligibleTriggers });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    if (isEligible) {
+      eligibleTriggers.push({ customTriggerId: id, identifier });
+    }
   }
+
+  res.status(200).json({ eligibleTriggers });
 });
 
 
