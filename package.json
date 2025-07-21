@@ -15,6 +15,7 @@
   "dependencies": {
     "@wix/ecom": "^1.0.1245",
     "@wix/members": "^1.0.304",
+    "@wix/pricing-plans": "^1.0.206",
     "@wix/sdk": "^1.15.24",
     "cors": "^2.8.5",
     "express": "^4.19.2",

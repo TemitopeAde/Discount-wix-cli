@@ -4,6 +4,7 @@ import { createClient, AppStrategy } from '@wix/sdk';
 import { customTriggers } from '@wix/ecom/service-plugins';
 import jwt from 'jsonwebtoken';
 import { members } from '@wix/members';
+import { orders } from '@wix/pricing-plans';
 
 
 const app = express();
@@ -146,20 +147,36 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const metadata = req.body?.data?.metadata;
   const eligibleTriggers = [];
 
+  const orderId = request?.context?.order
+
+  console.log(request?.context);
+  
+
+  async function getMemberOrder(orderId) {
+    try {
+      const order = await orders.memberGetOrder(orderId, { fieldSet: 'FULL' });
+      console.log(order);
+      return order;
+    } catch (error) {
+      console.error(error);
+      // Handle the error
+    }
+  }
+
 
   if (!request || !metadata) {
     return res.status(400).json({ error: "Invalid body format" });
   }
   console.log(request.triggers);
-  
+
   for (const trigger of request.triggers || []) {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
     let isEligible = false;
     console.log(metadata);
     // console.log(id);
-    
-    
+
+
     if (id === 'paid-plan-discount') {
       const memberId = metadata?.identity?.memberId;
 
