@@ -114,7 +114,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const memberId = metadata.identity?.memberId;
   const wixClient = getWixClient(instanceId);
 
-  const eligibleTriggers = [];
+  const eligibleTriggers = []
 
 
   async function listOrders() {
