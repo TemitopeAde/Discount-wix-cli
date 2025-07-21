@@ -150,6 +150,8 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const orderId = request?.context?.order
 
   console.log(request?.context);
+  console.log(orderId);
+  
   
 
   async function getMemberOrder(orderId) {
