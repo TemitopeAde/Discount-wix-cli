@@ -17,9 +17,9 @@ app.use((req, res, next) => {
 });
 
 
-// app.get('/', (req, res) => {
-//   res.send('Hello World!');
-// });
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 
 const wixClient = createClient({
   auth: AppStrategy({
