@@ -43,7 +43,7 @@ const availableTriggers = [
     id: "paid-plan-discount",
     name: "Customer with Active Paid Plan"
   }
-];
+]
 
 const parseTextPlainJwt = (req, res, next) => {
   if (req.is('text/plain')) {
