@@ -10,12 +10,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  console.log('Content-Type:', req.headers['content-type']);
-  console.log('Body:', req.body);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log(`${req.method} ${req.url}`);
+//   console.log('Content-Type:', req.headers['content-type']);
+//   console.log('Body:', req.body);
+//   next();
+// });
 
 
 app.get('/', (req, res) => {
@@ -147,6 +147,8 @@ app.post("/v1/list-triggers", (req, res) => {
 app.post('/v1/get-eligible-triggers', parseTextPlainJwt, async (req, res) => {
   const { request, metadata } = req.body;
   const eligibleTriggers = [];
+  console.log(request.triggers);
+  
 
   for (const trigger of request?.triggers || []) {
     const id = trigger.customTrigger?.id;
