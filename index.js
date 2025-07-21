@@ -146,10 +146,11 @@ app.post("/v1/list-triggers", (req, res) => {
 
 app.post('/v1/get-eligible-triggers', parseTextPlainJwt, async (req, res) => {
   const { request, metadata } = req.body;
-  const eligibleTriggers = [];
-  console.log(request.triggers);
+  console.log(req.body);
   
-
+  const eligibleTriggers = [];
+  // console.log(request.triggers);
+  
   for (const trigger of request?.triggers || []) {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
