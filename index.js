@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { createClient, AppStrategy } from '@wix/sdk';
 import { customTriggers } from '@wix/ecom/service-plugins';
+import jwt from 'jsonwebtoken';
 
 const app = express();
 
@@ -26,14 +27,14 @@ const wixClient = createClient({
     appId: "0a3fffa5-066c-4fc3-b7af-7138928b62c1",
 
     publicKey: `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiCmHJHomL1g7SWvgd9tu
-CKy/WXMAmemd2RfzR+6M4VD76OPswZwofQZPQ8ShMMLJ86MfpWQMIwNZu07F3Waw
-+3bWbuZBXspHcAaFMuZq8xTegDS8CSExOgTCjYV/uAJV1YQYfVQTLKFJ4bdlg7lu
-oLreUy/lq5zzHols8jZF64PVVEhsi1IPoqBgp3VPqMr+Zn2DODSJpslRcne7Q0FD
-mlRS3dGyEGPf7J0Jn/VD6GvSohwWCZcivxfnAIgoCEZUicqLGMrqG29hz/5TWWAj
-XhDDwZS8EgYkKQ+3coG87DVLOXRP1CI8t+8x80xYn+fM1VVyG/u/SiyLLYV4qJiQ
-7QIDAQAB
------END PUBLIC KEY-----`
+  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiCmHJHomL1g7SWvgd9tu
+  CKy/WXMAmemd2RfzR+6M4VD76OPswZwofQZPQ8ShMMLJ86MfpWQMIwNZu07F3Waw
+  +3bWbuZBXspHcAaFMuZq8xTegDS8CSExOgTCjYV/uAJV1YQYfVQTLKFJ4bdlg7lu
+  oLreUy/lq5zzHols8jZF64PVVEhsi1IPoqBgp3VPqMr+Zn2DODSJpslRcne7Q0FD
+  mlRS3dGyEGPf7J0Jn/VD6GvSohwWCZcivxfnAIgoCEZUicqLGMrqG29hz/5TWWAj
+  XhDDwZS8EgYkKQ+3coG87DVLOXRP1CI8t+8x80xYn+fM1VVyG/u/SiyLLYV4qJiQ
+  7QIDAQAB
+  -----END PUBLIC KEY-----`
   }),
   modules: {
     customTriggers
@@ -47,18 +48,18 @@ const availableTriggers = [
   }
 ];
 
-
-const parseTextPlainJson = (req, res, next) => {
+const parseTextPlainJwt = (req, res, next) => {
   if (req.is('text/plain')) {
     let raw = '';
     req.setEncoding('utf8');
     req.on('data', chunk => raw += chunk);
     req.on('end', () => {
       try {
-        console.log(raw);
-        
-        req.body = JSON.parse(raw);
-      } catch {
+        // 🔐 Decode the JWT without verifying (for now)
+        const decoded = jwt.decode(raw, { complete: false });
+        req.body = decoded;
+      } catch (e) {
+        console.error("❌ Failed to decode JWT:", e);
         req.body = {};
       }
       next();
@@ -143,11 +144,11 @@ app.post("/v1/list-triggers", (req, res) => {
   }
 });
 
-app.post('/v1/get-eligible-triggers', parseTextPlainJson, async (req, res) => {
+app.post('/v1/get-eligible-triggers', parseTextPlainJwt, async (req, res) => {
   const { request, metadata } = req.body;
-  const eligibleTriggers = [];
-  // console.log(req.body);
+  console.log(req.body);
   
+  const eligibleTriggers = [];
 
   for (const trigger of request?.triggers || []) {
     const id = trigger.customTrigger?.id;
@@ -162,7 +163,9 @@ app.post('/v1/get-eligible-triggers', parseTextPlainJson, async (req, res) => {
             const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
             const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
             isEligible = activePlans.length > 0;
-          } catch {}
+          } catch (err) {
+            console.error("Error checking membership:", err);
+          }
         }
         break;
     }
@@ -174,6 +177,7 @@ app.post('/v1/get-eligible-triggers', parseTextPlainJson, async (req, res) => {
 
   res.status(200).json({ eligibleTriggers });
 });
+
 
 
 app.post('/plugins-and-webhooks/*', (req, res) => {
