@@ -55,7 +55,7 @@ const parseTextPlainJson = (req, res, next) => {
     req.on('data', chunk => raw += chunk);
     req.on('end', () => {
       try {
-        // console.log(raw);
+        console.log(raw);
         
         req.body = JSON.parse(raw);
       } catch {
@@ -146,7 +146,7 @@ app.post("/v1/list-triggers", (req, res) => {
 app.post('/v1/get-eligible-triggers', parseTextPlainJson, async (req, res) => {
   const { request, metadata } = req.body;
   const eligibleTriggers = [];
-  console.log(req.body);
+  // console.log(req.body);
   
 
   for (const trigger of request?.triggers || []) {
