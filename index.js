@@ -121,7 +121,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     try {
       // const ordersList = await orders.memberListOrders();
       const orderList = await wixClient.orders.memberListOrders();
-      console.log(orderList);
+      console.log({orderList});
       
       return orderList;
     } catch (error) {
