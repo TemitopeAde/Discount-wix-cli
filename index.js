@@ -146,8 +146,6 @@ app.post("/v1/list-triggers", (req, res) => {
 
 app.post('/v1/get-eligible-triggers', parseTextPlainJwt, async (req, res) => {
   const { request, metadata } = req.body;
-  console.log(req.body);
-  
   const eligibleTriggers = [];
 
   for (const trigger of request?.triggers || []) {
@@ -155,12 +153,19 @@ app.post('/v1/get-eligible-triggers', parseTextPlainJwt, async (req, res) => {
     const identifier = trigger.identifier;
     let isEligible = false;
 
+    console.log(id);
+    
+
     switch (id) {
       case 'paid-plan-discount':
         const memberId = metadata?.identity?.memberId;
+        console.log(memberId);
+        
         if (memberId) {
           try {
             const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
+            console.log({plansResponse});
+            
             const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
             isEligible = activePlans.length > 0;
           } catch (err) {
@@ -172,6 +177,9 @@ app.post('/v1/get-eligible-triggers', parseTextPlainJwt, async (req, res) => {
 
     if (isEligible) {
       eligibleTriggers.push({ customTriggerId: id, identifier });
+    } else {
+      console.log("not eligible");
+      
     }
   }
 
