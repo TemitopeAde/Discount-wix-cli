@@ -71,7 +71,7 @@ const parseTextPlainJwt = (req, res, next) => {
 
 async function listOrders() {
   try {
-    const ordersList = await orders.memberListOrders();
+    const ordersList = await wixClient.orders.memberListOrders();
     console.log(ordersList);
     return ordersList;
   } catch (error) {
