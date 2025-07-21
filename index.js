@@ -156,8 +156,8 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
     let isEligible = false;
-    console.log(metadata?.identity?.memberId);
-    console.log(id);
+    console.log(metadata);
+    // console.log(id);
     
     
     if (id === 'paid-plan-discount') {
@@ -165,9 +165,10 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
 
       if (memberId) {
         try {
-          const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
-          const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
-          isEligible = activePlans.length > 0;
+          // const plansResponses = await wixClient
+          // const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
+          // const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
+          // isEligible = activePlans.length > 0;
         } catch (err) {
           console.error("Error checking membership:", err);
         }
