@@ -3,20 +3,14 @@ import cors from 'cors';
 import { createClient, AppStrategy } from '@wix/sdk';
 import { customTriggers } from '@wix/ecom/service-plugins';
 import jwt from 'jsonwebtoken';
+import { members } from '@wix/members';
+
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// app.use((req, res, next) => {
-//   console.log(`${req.method} ${req.url}`);
-//   console.log('Content-Type:', req.headers['content-type']);
-//   console.log('Body:', req.body);
-//   next();
-// });
-
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -37,7 +31,10 @@ const wixClient = createClient({
   -----END PUBLIC KEY-----`
   }),
   modules: {
-    customTriggers
+    customTriggers,
+    members: {
+      members
+    }
   }
 });
 
