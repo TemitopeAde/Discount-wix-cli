@@ -147,9 +147,22 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const metadata = req.body?.data?.metadata;
   const eligibleTriggers = [];
 
-  console.log({metadata});
-  
-  
+  async function listUserOrders(memberId) {
+    try {
+      const options = {
+        buyerIds: [memberId],
+        fieldSet: 'FULL',
+        limit: 50, 
+      };
+      const ordersList = await orders.managementListOrders(options);
+      return ordersList;
+    } catch (error) {
+      console.error(error);
+      // Handle the error
+    }
+  }
+
+
   async function getMemberOrder(orderId) {
     try {
       const order = await orders.memberGetOrder(orderId, { fieldSet: 'FULL' });
@@ -164,19 +177,19 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   if (!request || !metadata) {
     return res.status(400).json({ error: "Invalid body format" });
   }
-  console.log(request.triggers);
-
+  
   for (const trigger of request.triggers || []) {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
     let isEligible = false;
-    console.log(metadata);
-    // console.log(id);
+    
 
 
     if (id === 'paid-plan-discount') {
       const memberId = metadata?.identity?.memberId;
-
+      const res = await listUserOrders(memberId);
+      console.log({res});
+      
       if (memberId) {
         try {
           // const plansResponses = await wixClient
