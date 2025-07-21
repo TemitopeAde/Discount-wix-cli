@@ -182,10 +182,11 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     const identifier = trigger.identifier;
     let isEligible = false;
 
-
+    console.log(metadata);
+    
     if (id === 'paid-plan-discount') {
       const memberId = metadata?.identity?.memberId;
-      await listOrders();
+      // await listOrders();
       
       if (memberId) {
         try {
