@@ -67,6 +67,25 @@ const parseTextPlainJwt = (req, res, next) => {
   }
 };
 
+async function listOrders() {
+  try {
+    const options = {
+      limit: 50, 
+      sorting: {
+        fieldName: "createdDate", 
+        order: "DESC" 
+      }
+    };
+
+    const ordersList = await orders.managementListOrders(options);
+    console.log(ordersList); 
+    return ordersList;
+  } catch (error) {
+    console.error("Error retrieving orders:", error);
+  }
+}
+
+
 wixClient.customTriggers.provideHandlers({
   listTriggers: async (payload) => {
     try {
@@ -147,21 +166,6 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const metadata = req.body?.data?.metadata;
   const eligibleTriggers = [];
 
-  async function listUserOrders(memberId) {
-    try {
-      const options = {
-        buyerIds: [memberId],
-        fieldSet: 'FULL',
-        limit: 50, 
-      };
-      const ordersList = await orders.managementListOrders(options);
-      return ordersList;
-    } catch (error) {
-      console.error(error);
-      // Handle the error
-    }
-  }
-
 
   async function getMemberOrder(orderId) {
     try {
@@ -177,19 +181,19 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   if (!request || !metadata) {
     return res.status(400).json({ error: "Invalid body format" });
   }
-  
+
   for (const trigger of request.triggers || []) {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
     let isEligible = false;
-    
+
 
 
     if (id === 'paid-plan-discount') {
       const memberId = metadata?.identity?.memberId;
-      const res = await listUserOrders(memberId);
-      console.log({res});
-      
+      const res = await listOrders(memberId);
+      console.log({ res });
+
       if (memberId) {
         try {
           // const plansResponses = await wixClient
