@@ -33,6 +33,7 @@ const wixClient = createClient({
   }),
   modules: {
     customTriggers,
+    orders,
     members: {
       members
     }
