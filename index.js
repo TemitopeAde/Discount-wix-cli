@@ -99,15 +99,7 @@ customTriggers.provideHandlers({
   }
 });
 
-// 🧪 Health Check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    service: 'Custom Discount Triggers',
-    triggers: availableTriggers.length,
-    timestamp: new Date().toISOString()
-  });
-});
+
 
 // 🧪 Manual Trigger List Test
 app.post("/v1/list-triggers", (req, res) => {
