@@ -4,7 +4,7 @@ import { createClient, AppStrategy } from '@wix/sdk';
 import { customTriggers } from '@wix/ecom/service-plugins';
 import jwt from 'jsonwebtoken';
 import { members } from '@wix/members';
-import { orders, plans, plansV3 } from '@wix/pricing-plans';
+import { orders, plansV3 } from '@wix/pricing-plans';
 
 const app = express();
 app.use(cors());
@@ -48,6 +48,7 @@ function getWixClient(instanceId) {
     modules: {
       customTriggers,
       orders,
+      plansV3,
       members: {
         members
       }
@@ -123,10 +124,11 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   async function listOrders() {
     try {
       // const ordersList = await orders.memberListOrders();
-      const orderList = await wixClient.orders.memberListOrders();
-      console.log({orderList: orderList})
+      const { items } = await wixClient.plansV3.queryPlans().find();
+      // const orderList = await wixClient.orders.memberListOrders();
+      console.log({items})
       
-      return orderList;
+      return items
     } catch (error) {
       console.error(error);
       // Handle the error
