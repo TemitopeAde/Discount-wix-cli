@@ -124,10 +124,12 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   async function listOrders() {
     try {
       // const ordersList = await orders.memberListOrders();
-      const { items } = await wixClient.plansV3.queryPlans().find();
+      // const { items } = await wixClient.plansV3.queryPlans().find();
       // const orderList = await wixClient.orders.memberListOrders();
-      console.log({items})
-      
+      // console.log({items})
+
+      const items = await wixClient.orders.managementListOrders()
+      console.log(items);
       return items
     } catch (error) {
       console.error(error);
