@@ -118,7 +118,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const eligibleTriggers = []
 
   console.log(instanceId);
-  
+
 
 
   async function listOrders() {
@@ -128,7 +128,15 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
       // const orderList = await wixClient.orders.memberListOrders();
       // console.log({items})
 
-      const items = await wixClient.orders.managementListOrders()
+      const options = {
+        buyerIds: [`${memberId}`],
+        sorting: {
+          fieldName: 'createdDate',
+          order: 'DESC'
+        }
+      };
+
+      const items = await wixClient.orders.managementListOrders(options)
       console.log(items);
       return items
     } catch (error) {
@@ -142,8 +150,8 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     const identifier = trigger.identifier;
 
     let isEligible = false;
-    console.log({memberId});
-    
+    console.log({ memberId });
+
 
     if (id === 'paid-plan-discount' && memberId) {
       try {
