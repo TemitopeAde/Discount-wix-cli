@@ -123,13 +123,9 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
 
   async function listOrders() {
     try {
-      // const ordersList = await orders.memberListOrders();
-      // const { items } = await wixClient.plansV3.queryPlans().find();
-      // const orderList = await wixClient.orders.memberListOrders();
-      // console.log({items})
-
       const options = {
         buyerIds: [`${memberId}`],
+        orderStatuses: ["ACTIVE"],
         sorting: {
           fieldName: 'createdDate',
           order: 'DESC'
@@ -150,17 +146,19 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     const identifier = trigger.identifier;
 
     let isEligible = false;
-    console.log({ memberId });
-
 
     if (id === 'paid-plan-discount' && memberId) {
       try {
-        await listOrders()
-        // const plansResponse = await wixClient.members.membership.listMemberships({ memberId });
-        // const activePlans = plansResponse.memberships?.filter(p => p.status === 'ACTIVE');
-        // isEligible = activePlans.length > 0;
+        const memberOrder = await listOrders();
+        if (memberOrder.orders.length > 0) {
+          console.log("eligible");
+          isEligible = true
+        }
       } catch (err) {
         console.error("Error checking membership:", err);
+        console.log("not eligible");
+        
+        isEligible = false
       }
     }
 
