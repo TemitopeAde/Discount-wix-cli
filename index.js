@@ -116,6 +116,9 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
 
   const eligibleTriggers = []
 
+  console.log(instanceId);
+  
+
 
   async function listOrders() {
     try {
