@@ -117,10 +117,6 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
 
   const eligibleTriggers = []
 
-  console.log(instanceId);
-
-
-
   async function listOrders() {
     try {
       const options = {
@@ -157,7 +153,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
       } catch (err) {
         console.error("Error checking membership:", err);
         console.log("not eligible");
-        
+
         isEligible = false
       }
     }
