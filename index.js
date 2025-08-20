@@ -136,7 +136,8 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
       // Handle the error
     }
   }
-
+  console.log(request.triggers);
+  
   for (const trigger of request.triggers || []) {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
