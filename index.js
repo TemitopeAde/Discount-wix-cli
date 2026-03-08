@@ -122,12 +122,12 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const instance = await wixClient.appInstances.getAppInstance();
   console.log(JSON.stringify(instance, null, 2));
 
-  const isFree = instance?.instance?.isFree;
   const billing = instance?.instance?.billing;
-  const isPro = billing?.packageName?.toLowerCase() === 'pro';
+  const ELIGIBLE_PLANS = ['pro', 'pro-plan', 'business'];
+  const isEligiblePlan = ELIGIBLE_PLANS.includes(billing?.packageName?.toLowerCase());
   const isFreeTrial = billing?.freeTrialInfo?.status === 'IN_PROGRESS';
-  const shouldApplyDiscount = !isFree || isFreeTrial;
-  console.log({ isPro, isFreeTrial, shouldApplyDiscount });
+  const shouldApplyDiscount = isEligiblePlan || isFreeTrial;
+  console.log({ packageName: billing?.packageName, isEligiblePlan, isFreeTrial, shouldApplyDiscount });
 
   const eligibleTriggers = []
 
