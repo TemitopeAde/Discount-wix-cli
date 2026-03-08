@@ -104,6 +104,9 @@ app.post("/v1/list-triggers", (req, res) => {
 });
 
 app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
+  console.log(JSON.stringify(req.body));
+  console.log(JSON.stringify(req.body?.data.metadata));
+
   const request = req.body?.data?.request;
   const metadata = req.body?.data?.metadata;
 
@@ -137,7 +140,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     }
   }
   console.log(request.triggers);
-  
+
   for (const trigger of request.triggers || []) {
     const id = trigger.customTrigger?.id;
     const identifier = trigger.identifier;
