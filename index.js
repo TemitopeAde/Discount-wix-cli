@@ -122,7 +122,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const wixClient = getWixClient(instanceId);
 
   const instance = await wixClient.appInstances.getAppInstance();
-  console.log({ instance });
+  console.log(JSON.stringify(instance, null, 2));
 
   const eligibleTriggers = []
 
