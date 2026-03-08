@@ -107,8 +107,6 @@ app.post("/v1/list-triggers", (req, res) => {
 });
 
 app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
-  console.log(JSON.stringify(req.body));
-  console.log(JSON.stringify(req.body?.data.metadata));
 
   const request = req.body?.data?.request;
   const metadata = req.body?.data?.metadata;
@@ -127,9 +125,16 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const billing = instance?.instance?.billing;
   const packageName = billing?.packageName?.toLowerCase();
   const isPro = packageName === 'pro';
+  console.log({ isPro });
+
+
   const isFreeTrial = billing?.freeTrialInfo?.status === 'IN_PROGRESS';
+  console.log({ isFreeTrial });
+
   // Apply discount only when NOT on "pro" plan, OR if on a free trial
   const shouldApplyDiscount = !isPro || isFreeTrial;
+  console.log({ shouldApplyDiscount });
+
 
   const eligibleTriggers = []
 
@@ -142,7 +147,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
           fieldName: 'createdDate',
           order: 'DESC'
         }
-      };
+      }
 
       const items = await wixClient.orders.managementListOrders(options)
       console.log(items);
@@ -163,6 +168,8 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
     if (id === 'paid-plan-discount' && memberId) {
       try {
         const memberOrder = await listOrders();
+        console.log({ memberOrder });
+
         if (memberOrder.orders.length > 0 && shouldApplyDiscount) {
           console.log("eligible");
           isEligible = true
