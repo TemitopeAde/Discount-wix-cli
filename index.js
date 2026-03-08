@@ -122,19 +122,12 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const instance = await wixClient.appInstances.getAppInstance();
   console.log(JSON.stringify(instance, null, 2));
 
+  const isFree = instance?.instance?.isFree;
   const billing = instance?.instance?.billing;
-  const packageName = billing?.packageName?.toLowerCase();
-  const isPro = packageName === 'pro';
-  console.log({ isPro });
-
-
+  const isPro = billing?.packageName?.toLowerCase() === 'pro';
   const isFreeTrial = billing?.freeTrialInfo?.status === 'IN_PROGRESS';
-  console.log({ isFreeTrial });
-
-  // Apply discount only when NOT on "pro" plan, OR if on a free trial
-  const shouldApplyDiscount = !isPro || isFreeTrial;
-  console.log({ shouldApplyDiscount });
-
+  const shouldApplyDiscount = !isFree || isFreeTrial;
+  console.log({ isPro, isFreeTrial, shouldApplyDiscount });
 
   const eligibleTriggers = []
 
@@ -172,7 +165,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
 
         if (memberOrder.orders.length > 0 && shouldApplyDiscount) {
           console.log("eligible");
-          isEligible = true
+          isEligible = true;
         }
       } catch (err) {
         console.error("Error checking membership:", err);
