@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 import { members } from '@wix/members';
 import { orders, plansV3 } from '@wix/pricing-plans';
 
+import { appInstances } from "@wix/app-management";
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -46,6 +48,7 @@ function getWixClient(instanceId) {
       instanceId
     }),
     modules: {
+      appInstances,
       customTriggers,
       orders,
       plansV3,
@@ -118,6 +121,9 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const memberId = metadata.identity?.memberId;
   const wixClient = getWixClient(instanceId);
 
+  const instance = await wixClient.appInstances.getAppInstance();
+  console.log({ instance });
+
   const eligibleTriggers = []
 
   async function listOrders() {
@@ -189,6 +195,8 @@ app.all('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
+
 app.listen(PORT, () => {
   console.log('Custom Discount Triggers Service Plugin Started');
   console.log(`Server: http://localhost:${PORT}`);

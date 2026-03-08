@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@wix/app-management": "^1.0.145",
     "@wix/ecom": "^1.0.1245",
     "@wix/members": "^1.0.304",
     "@wix/pricing-plans": "^1.0.206",
