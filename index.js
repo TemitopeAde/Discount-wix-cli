@@ -128,7 +128,7 @@ app.post("/v1/get-eligible-triggers", parseTextPlainJwt, async (req, res) => {
   const isFreeTrial = billing?.freeTrialInfo?.status === 'IN_PROGRESS';
   const shouldApplyDiscount = isEligiblePlan || isFreeTrial;
   console.log({ packageName: billing?.packageName, isEligiblePlan, isFreeTrial, shouldApplyDiscount });
-
+  console.log({ billing });
   const eligibleTriggers = []
 
   async function listOrders() {
